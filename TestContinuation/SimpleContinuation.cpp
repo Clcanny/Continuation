@@ -1,4 +1,8 @@
-#include "continuation_fcontext.h"
+/* #include "continuation_fcontext.h" */
+#include <boost/context/all.hpp>
+using namespace boost::context;
+typedef continuation Continuation;
+
 #include <iostream>
 
 int main()
