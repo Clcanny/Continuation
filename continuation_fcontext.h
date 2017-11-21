@@ -57,7 +57,7 @@ class StackAllocator
 
 	StackContext allocate()
 	{
-	    void * vp = std::malloc(size);
+	    void *vp = std::malloc(size);
             if (!vp) {
                 throw std::bad_alloc();
             }
@@ -72,7 +72,8 @@ class StackAllocator
 	    assert(sctx.sp != nullptr);
 	    void *vp = static_cast<char *>(sctx.sp) - sctx.size;
             std::free(vp);
-	    vp = nullptr;
+	    sctx.sp = nullptr;
+	    /* vp = nullptr; */
 	}
 };
 
@@ -119,11 +120,11 @@ class Continuation
             std::swap(fctx, other.fctx);
         }
     
-        Continuation & operator=(Continuation && other) noexcept
+        Continuation &operator=(Continuation &&other) noexcept
 	{
-            if (this != & other)
+            if (this != &other)
 	    {
-                Continuation tmp = std::move( other);
+                Continuation tmp = std::move(other);
                 swap(tmp);
             }
             return * this;
@@ -154,6 +155,47 @@ class Continuation
 	{
     	    std::swap(fctx, other.fctx);
     	}
+
+    public:
+	explicit operator bool() const noexcept
+	{
+	    return fctx != nullptr;
+	}
+
+	bool operator!() const noexcept
+	{
+	    return fctx == nullptr;
+	}
+
+	bool operator==(Continuation const& other) const noexcept
+	{
+	    return fctx == other.fctx;
+	}
+
+	bool operator!=(Continuation const& other) const noexcept
+	{
+	    return fctx != other.fctx;
+	}
+
+	bool operator<(Continuation const& other) const noexcept
+	{
+	    return fctx < other.fctx;
+	}
+
+	bool operator>(Continuation const& other) const noexcept
+	{
+	    return fctx > other.fctx;
+	}
+
+	bool operator<=(Continuation const& other) const noexcept
+	{
+	    return !(*this > other);
+	}
+
+	bool operator>=(Continuation const& other) const noexcept
+	{
+	    return !(*this < other);
+	}
 };
 
 template <typename Fn>
@@ -171,6 +213,7 @@ class ControlRecord
 	    StackContext sctx = cr->sctx;
 	    /* deallocate record */
 	    cr->~ControlRecord();
+	    /* destroy stack with stack allocator */
 	    salloc.deallocate(sctx);
 	}
 
@@ -195,6 +238,7 @@ class ControlRecord
 	}
 };
 
+inline
 transfer_t context_unwind(transfer_t t)
 {
     throw forced_unwind(t.fctx);
@@ -231,7 +275,8 @@ void context_entry(transfer_t t) noexcept
 	t = { e.fctx, nullptr };
     }
     assert(t.fctx != nullptr);
-    ontop_fcontext(t.fctx, cr, &context_exit<Fn>);
+    /* destroy context-stack of this context on next context */
+    ontop_fcontext(t.fctx, cr, context_exit<Fn>);
 
     /* context already terminated */
     assert(false);
