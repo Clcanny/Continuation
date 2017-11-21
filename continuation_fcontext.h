@@ -46,6 +46,7 @@ class StackAllocator
 	    assert(sctx.sp != nullptr);
 	    void *vp = static_cast<char *>(sctx.sp) - sctx.size;
             std::free(vp);
+	    vp = nullptr;
 	}
 };
 
