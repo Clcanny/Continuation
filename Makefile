@@ -11,7 +11,7 @@ objdump : compile
 	objdump -D main.o > main.S
 
 memcheck : compile
-	valgrind --tool=memcheck --leak-check=full --leak-resolution=high --show-leak-kinds=all --log-file=mem.report ./main.o
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes --leak-resolution=high --show-leak-kinds=all --log-file=mem.report ./main.o
 
 clean :
 	- rm *.o

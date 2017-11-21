@@ -66,13 +66,13 @@ transfer_t context_unwind(transfer_t t);
 class Continuation
 {
     private:
-	template <typename Fn >
+	template <typename Fn>
 	friend class ControlRecord;
 
-	template <typename Fn >
+	template <typename Fn>
     	friend transfer_t context_ontop(transfer_t);
 
-    	template <typename Fn >
+    	template <typename Fn>
     	friend Continuation callcc(StackAllocator, Fn &&);
 
     private:
@@ -80,7 +80,7 @@ class Continuation
 
     private:
 	Continuation(fcontext_t f) noexcept :
-	    fctx{ f }
+	    fctx(f)
 	{}
 
     public:
