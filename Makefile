@@ -10,8 +10,12 @@ compile :
 objdump : compile
 	objdump -D main.o > main.S
 
+memcheck : compile
+	valgrind --tool=memcheck --leak-check=full --leak-resolution=high --show-leak-kinds=all --log-file=mem.report ./main.o
+
 clean :
 	- rm *.o
 	- rm *.a
 	- rm core
+	- rm mem.report*
 	- rm main.S
