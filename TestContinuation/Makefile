@@ -16,6 +16,7 @@ all :
 	ar crf libontopfcontext.a ontop_fcontext.o
 	$(call compile, SimpleContinuation)
 	$(call compile, NestedContinuation)
+	$(call compile, StackFContext)
 
 clean :
 	rm *.o
