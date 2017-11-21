@@ -6,11 +6,37 @@
 #include <type_traits>
 #include <cassert>
 #include <tuple>
-
-#include <boost/context/detail/invoke.hpp>
-#include <boost/context/detail/exchange.hpp>
+#include <functional>
 
 #include "fcontext.h"
+
+template <typename T, typename U = T>
+T exchange(T &t, U &&nv)
+{
+    T ov = std::move(t);
+    t = std::forward<U>(nv);
+    return ov;
+}
+
+template <typename Fn, typename ... Args>
+typename std::enable_if<
+    std::is_member_pointer<typename std::decay<Fn>::type>::value,
+    typename std::result_of<Fn&& (Args&& ...)>::type
+>::type
+invoke(Fn &&fn, Args&& ... args)
+{
+    return std::mem_fn(fn)(std::forward<Args>(args) ...);   
+}
+
+template <typename Fn, typename ... Args>
+typename std::enable_if<
+    !std::is_member_pointer<typename std::decay<Fn>::type>::value,
+    typename std::result_of<Fn&& (Args&& ...)>::type
+>::type
+invoke(Fn &&fn, Args&& ... args)
+{
+    return std::forward<Fn>(fn)(std::forward<Args>(args) ...);
+}
 
 /* POD */
 struct StackContext
@@ -109,7 +135,7 @@ class Continuation
 	    {
 		/* you shouldn't arrvie here */
 		ontop_fcontext(
-		    boost::context::detail::exchange(fctx, nullptr),
+		    exchange(fctx, nullptr),
 		    nullptr,
 		    context_unwind
 		);
@@ -120,7 +146,7 @@ class Continuation
     	{
     	    assert(fctx != nullptr);
     	    return jump_fcontext(
-    	    	boost::context::detail::exchange(fctx, nullptr),
+		exchange(fctx, nullptr),
     	    	nullptr).fctx;
     	}
 
@@ -164,8 +190,8 @@ class ControlRecord
 	fcontext_t run(fcontext_t fctx)
 	{
 	    Continuation continuation{ fctx };
-	    continuation = boost::context::detail::invoke(fn, std::move(continuation));
-	    return boost::context::detail::exchange(continuation.fctx, nullptr);
+	    continuation = invoke(fn, std::move(continuation));
+	    return exchange(continuation.fctx, nullptr);
 	}
 };
 
@@ -224,7 +250,7 @@ transfer_t context_ontop(transfer_t t)
     /* execute function, pass Continuation via reference */
     continuation = fn(std::move(continuation));
 
-    return { boost::context::detail::exchange(continuation.fctx, nullptr), nullptr };
+    return { exchange(continuation.fctx, nullptr), nullptr };
 }
 
 template <typename Fn>
@@ -239,7 +265,7 @@ fcontext_t create_context(StackAllocator salloc, Fn &&fn)
     );
 
     /* placment new for control structure on context stack */
-    ControlRecord<Fn> * record = new (storage) ControlRecord<Fn>{ sctx, salloc, std::forward<Fn>(fn) };
+    ControlRecord<Fn> *record = new (storage) ControlRecord<Fn>{ sctx, salloc, std::forward<Fn>(fn) };
 
     /* 64byte gab between control structure and stack top */
     /* should be 16byte aligned */
