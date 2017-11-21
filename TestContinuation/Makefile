@@ -7,6 +7,14 @@ compile = g++ \
 	  -static-libstdc++ \
 	  -o $1.o
 
+compileb = g++ \
+	   -g -Wall -std=c++11 \
+	   $1.cpp \
+	   -lboost_context \
+	   -static -static-libgcc \
+	   -static-libstdc++ \
+	   -o $1.o
+
 all :
 	g++ -c ../jump_x86_64_sysv_elf_gas.S -o jump_fcontext.o
 	g++ -c ../make_x86_64_sysv_elf_gas.S -o make_fcontext.o
@@ -16,7 +24,7 @@ all :
 	ar crf libontopfcontext.a ontop_fcontext.o
 	$(call compile, SimpleContinuation)
 	$(call compile, NestedContinuation)
-	$(call compile, StackFContext)
+	$(call compileb, StackFContext)
 
 clean :
 	rm *.o

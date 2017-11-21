@@ -1,4 +1,7 @@
-#include "fcontext.h"
+/* #include "fcontext.h" */
+#include <boost/context/detail/fcontext.hpp>
+using namespace boost::context::detail;
+
 #include <cstdlib>
 #include <stdexcept>
 #include <cassert>
@@ -39,7 +42,7 @@ void f2(transfer_t t)
 {
     std::cout << "f1: entered" << std::endl;
     SimpleStackAllocator alloc;
-    void * sp = alloc.allocate();
+    void *sp = alloc.allocate();
     fcontext_t ctx = make_fcontext(sp, SimpleStackAllocator::size, f1);
     jump_fcontext(ctx, 0);
     jump_fcontext(t.fctx, 0);
