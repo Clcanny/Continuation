@@ -72,7 +72,7 @@ class StackAllocator
 	    assert(sctx.sp != nullptr);
 	    void *vp = static_cast<char *>(sctx.sp) - sctx.size;
             std::free(vp);
-	    sctx.sp = nullptr;
+	    /* sctx.sp = nullptr; */
 	    /* vp = nullptr; */
 	}
 };
@@ -103,7 +103,7 @@ class Continuation
     	friend Continuation callcc(StackAllocator, Fn &&);
 
     private:
-    	fcontext_t  fctx{ nullptr };
+    	fcontext_t fctx{ nullptr };
 
     private:
 	Continuation(fcontext_t f) noexcept :
@@ -127,7 +127,7 @@ class Continuation
                 Continuation tmp = std::move(other);
                 swap(tmp);
             }
-            return * this;
+            return *this;
         }
     
         ~Continuation()
@@ -141,7 +141,7 @@ class Continuation
 		    context_unwind
 		);
 	    }
-	}   
+	}
 
 	Continuation resume()
     	{
