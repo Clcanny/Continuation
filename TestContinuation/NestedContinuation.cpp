@@ -1,22 +1,23 @@
-#include "continuation_fcontext.h"
+#include "Header.h"
 #include <iostream>
 
 int main()
 {
-    Continuation source_c = callcc(
-	    [](Continuation &&sink) {
+    Continuation source_a = callcc(
+	[](Continuation &&sink) {
 	    sink = sink.resume();
 	    std::cout << "Depth: 1" << std::endl;
-	    Continuation source_d = callcc(
-		    [](Continuation &&sink) {
-			sink = sink.resume();
-			std::cout << "Depth: 2" << std::endl;
-			return std::move(sink);
+	    Continuation source_b = callcc(
+		[](Continuation &&sink) {
+		    sink = sink.resume();
+		    std::cout << "Depth: 2" << std::endl;
+		    return std::move(sink);
 		}
 	    );
-	    source_d = source_d.resume();
+	    source_b = source_b.resume();
 	    return std::move(sink);
 	}
     );
-    source_c = source_c.resume();
+    source_a = source_a.resume();
+
 }

@@ -13,7 +13,10 @@ compileb = g++ \
 	   -o $1.o \
 	   -lboost_system \
 	   -lboost_context \
-	   -static -static-libgcc \
+	   -lboost_thread \
+	   -lpthread \
+	   -static \
+	   -static-libgcc \
 	   -static-libstdc++
 
 all :
@@ -23,9 +26,10 @@ all :
 	ar crf libjumpfcontext.a jump_fcontext.o
 	ar crf libmakefcontext.a make_fcontext.o
 	ar crf libontopfcontext.a ontop_fcontext.o
-	$(call compile, SimpleContinuation)
+	$(call compileb, SimpleContinuation)
+	$(call compileb, FibonacciContinuation)
 	$(call compileb, NestedContinuation)
-	$(call compileb, StackFContext)
+	# $(call compileb, StackFContext)
 
 clean :
 	rm *.o
