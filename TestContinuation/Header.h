@@ -2,7 +2,7 @@
 #define HEADER_HPP
 
 /* compile without boost */
-#ifdef USE_BOOST
+#ifdef WITHOUT_BOOST
 #include "continuation_fcontext.h"
 /* compile with boost */
 #else
