@@ -30,12 +30,14 @@ test :
 	$(call compilen, SimpleContinuation)
 	$(call compilen, FibonacciContinuation)
 	$(call compilen, NestedContinuation)
+	$(call compilen, Parser)
 
 stanard :
 	$(call compileb, SimpleContinuation)
 	$(call compileb, FibonacciContinuation)
-	$(call compileb, NestedContinuation);
+	$(call compileb, NestedContinuation)
+	$(call compileb, Parser)
 
 clean :
-	rm *.o
-	rm *.a
+	- rm *.o
+	- rm *.a
